@@ -1,0 +1,41 @@
+<html>
+<head>
+
+<script>
+	var connection = new WebSocket('ws://127.0.0.1:8011/');
+	var dataPoints=[];
+
+	connection.onopen = function () {
+		console.log("I am connected");
+	};
+
+	connection.onerror = function (error) {
+		console.log('WebSocket Error ', error);
+	};
+
+	function tryParseJSONObject (jsonString){
+		try {
+			var o = JSON.parse(jsonString);
+			if (o && typeof o === "object") {
+				return o;
+			}
+		}
+		catch (e) { }
+
+		return false;
+	};
+
+	connection.onmessage = async function (e) {
+		let parsed=tryParseJSONObject(e.data);
+		console.log('received raw: ', parsed?parsed:e.data);
+		const text = await e.data.text();
+		console.log("received as text: "+text);
+	};
+
+</script>
+
+</head>
+<body>
+<h1>Simple Websocket listener</h1><br/>
+</body>
+</html>

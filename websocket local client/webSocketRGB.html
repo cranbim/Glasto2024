@@ -1,0 +1,61 @@
+<html>
+<head>
+
+<script>
+	var connection = new WebSocket('ws://127.0.0.1:8011/');
+	var dataPoints=[];
+
+	connection.onopen = function () {
+		console.log("I am connected");
+	};
+
+	connection.onerror = function (error) {
+		console.log('WebSocket Error ', error);
+	};
+
+	function tryParseJSONObject (jsonString){
+		try {
+			var o = JSON.parse(jsonString);
+			if (o && typeof o === "object") {
+				return o;
+			}
+		}
+		catch (e) { }
+
+		return false;
+	};
+
+	connection.onmessage = async function (e) {
+		let parsed=tryParseJSONObject(e.data);
+		console.log('received: ', parsed?parsed:e.data);
+		if(parsed.rgb){
+			document.body.style.backgroundColor=parsed.rgb;
+		}
+		const text = await e.data.text();
+		console.log(text)
+	};
+
+	function sendRGB() {
+		var r = parseInt(document.getElementById('r').value).toString(16);
+		var g = parseInt(document.getElementById('g').value).toString(16);
+		var b = parseInt(document.getElementById('b').value).toString(16);
+		if(r.length < 2) { r = '0' + r; }
+		if(g.length < 2) { g = '0' + g; }
+		if(b.length < 2) { b = '0' + b; }
+		var rgb = '#'+r+g+b;
+		console.log('RGB: ' + rgb);
+		connection.send(JSON.stringify({rgb:rgb}));
+		// document.body.style.backgroundColor=rgb;
+	}
+
+</script>
+
+</head>
+<body>
+Remote RGB Control:<br/>
+<br/>
+R: <input id="r" type="range" min="0" max="255" step="1" oninput="sendRGB();" /><br/>
+G: <input id="g" type="range" min="0" max="255" step="1" oninput="sendRGB();" /><br/>
+B: <input id="b" type="range" min="0" max="255" step="1" oninput="sendRGB();" /><br/>
+</body>
+</html>
