@@ -40,11 +40,11 @@ void draw(){
     if (!modString.equals("")) {
       for(int i=0; i<numButtons; i++){
         if(modString.equals(LIKEBUTTONS[0])){
-          println(LIKEBUTTONS[0])
+          println(LIKEBUTTONS[0]);
         } else if(modString.equals(LIKEBUTTONS[1])){
-          println(LIKEBUTTONS[1])
+          println(LIKEBUTTONS[1]);
         } else if(modString.equals(LIKEBUTTONS[2])){
-          println(LIKEBUTTONS[2])
+          println(LIKEBUTTONS[2]);
         }
       }
     }
