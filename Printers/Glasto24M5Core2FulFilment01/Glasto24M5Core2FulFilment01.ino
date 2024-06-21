@@ -33,7 +33,7 @@ int currentFulfilment=0;
 // int numberFulfilments=2;
 int fulfilmentsThisSession=0;
 #include "Adafruit_Thermal.h"
-#include "fclogo01.h" //this is the bitmap logo file
+#include "fclogo03.h" //this is the bitmap logo file
 #define TX_PIN 14 // Arduino transmit  YELLOW WIRE  labeled RX on printer
 #define RX_PIN 13//5 // Arduino receive   GREEN WIRE   labeled TX on printer
 HardwareSerial mySerial(2);
@@ -69,7 +69,7 @@ int timeOnAmber=7000;
 void printFulfilment(int messageIndex){
   M5.Lcd.print("Printing message: ");
   M5.Lcd.println(messageIndex);
-  printer.printBitmap(fclogo01_width, fclogo01_height, fclogo01_data);
+  printer.printBitmap(fclogo03_width, fclogo03_height, fclogo03_data);
   printer.justify('C');
   printer.setSize('M');
   printer.println("Welcome to the");

@@ -32,7 +32,7 @@ Adafruit_NeoPixel strip4(LED_STEM_COUNT,8, NEO_GRB + NEO_KHZ800);
 
 int currentChase=0;
 int numChase=50;
-int numLit=20;
+int numLit=10;
 
 
 
@@ -184,5 +184,5 @@ void loop(){
   chase4();
   currentChase=(currentChase+1)%numChase;
   
-  delay(10);  
+  delay(5);  
 }
