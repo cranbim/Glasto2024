@@ -4,11 +4,13 @@ let gotMarks=false
 let displaySize
 let resizedDetections=[]
 const emotions=["angry","disgusted","fearful","happy","neutral","sad","surprised"]
-const imageIndex=[3,2,1,0,1,2,3]
+const labels=["spend now","buy more","use credit","fulfilled","go shopping","be better","get product"]
+const imageIndex=[2,2,1,0,1,2,1]
 let scrollers=[]
 let numScrollers=10
 let images=[]
 let shapes
+let dispScale=1
 
 
 function preload(){
@@ -21,12 +23,13 @@ function preload(){
         faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
         faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
         faceapi.nets.faceExpressionNet.loadFromUri('./models')
-
+        // capture=createCapture(VIDEO)
 }
 
 function setup(){
     canvas=createCanvas(windowWidth, windowHeight)
     capture=createCapture(VIDEO)
+    // capture.size(640,360)
     // capture.hide()
     // console.log(capture)
     displaySize = { width: capture.width, height: capture.height }
@@ -72,9 +75,16 @@ function getMarks(){
 
 
 function draw(){
+    background(128)
     if(gotMarks){
+        dispScale=windowWidth/capture.width
+
         if(true){
-            background(128)
+
+            
+            push()
+            translate(0,-(capture.height*dispScale-height)/2)
+            scale(dispScale)
             image(capture,0,0)
             // getMarks()
             // console.log(">>>")
@@ -83,9 +93,12 @@ function draw(){
                 drawDetection(rd)
                 labelEmotion(rd,i)
             })
+            shapes.run()
+            pop()
         }
+    } else {
+        resizedDetections=[]
     }
-    shapes.run()
 }
 
 function labelEmotion(det,index){
@@ -100,21 +113,33 @@ function labelEmotion(det,index){
     emotions.forEach((e,j)=>{
         if(det.expressions[e]>max){
             max=det.expressions[e]
-            currentEmotion=e
+            // currentEmotion=e
+            currentEmotion=labels[j]
             emotionIndex=j
         }
     })
+    let isFulfilled=(emotionIndex==3)
     rectMode(CORNER)
-    fill(255,0,0)
+    fill(255,0,0,150)
+    if(isFulfilled){
+        fill(255)
+    }
     noStroke()
-    rect(x,y+h,w,width*0.05)
-    fill(255)
+    textSize(height*0.04)
+    textFont('monospace')
+    let tw=textWidth(currentEmotion)*1.25
+    push()
+    rect(x+w/2,y+h*1.05,tw,height*0.05,0,height*0.025,height*0.025,height*0.025)
+    pop()
+    fill(255,200)
+    if(isFulfilled){
+        fill(200,0,0)
+    }
     noStroke()
-    textSize(width*0.04)
     textAlign(LEFT,CENTER)
-    text(currentEmotion,x,y+h+width*0.025)
+    text(currentEmotion,x+w*0.55,y+h*1.05+height*0.025)
     console.log(emotionIndex)
-    if(random(10)<1.5){
+    if(random(15)<1){
         shapes.add(x+w*0.8, y+h*0.15,images[imageIndex[emotionIndex]])
     }
     // scrollers[index].setText(currentEmotion)
@@ -132,10 +157,19 @@ function drawDetection(det){
     let h=det.alignedRect._box._height
     let w=det.alignedRect._box._width
     stroke(255,0,0)
-    strokeWeight(3)
+    strokeWeight(1)
     noFill()
-    rectMode(CORNER)
-    rect(x,y,w,h)
+    rectMode(CENTER)
+    let rel=(frameCount%30)/30
+    let rel2=((frameCount+15)%30)/30
+    rect(x+w/2,y+h/2,w,h,w*0.5, h*0.5)
+    noFill()
+    strokeWeight(10*(rel))
+    stroke(255,0,0,255*(1-rel))
+    rect(x+w/2,y+h/2,w*(1+rel),h*(1+rel),w*0.5*(1+rel), h*0.5*(1+rel))
+    strokeWeight(10*(rel2))
+    stroke(255,0,0,255*(1-rel2))
+    rect(x+w/2,y+h/2,w*(1+rel2),h*(1+rel2),w*0.5*(1+rel2), h*0.5*(1+rel2))
 }
 
 function Shapes(){
@@ -159,9 +193,9 @@ function Shapes(){
 function Shape(x,y,img){
     let ttlMax=100
     let ttl=ttlMax
-    let driftX=random(-1,1)
+    let driftX=random(-0.1,2)
     let driftY=random(-0.2,-1.5)
-    let accY=1.01
+    let accY=1.015
     let scl=1
 
     this.run=function(){

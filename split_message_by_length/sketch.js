@@ -1,5 +1,5 @@
 // let message="I have no idea how long this message is, but we will need to split it to fit the intended length./nLet's see how it does"
-let message="This product was created with your wellness in mind by ten year olds in bonded labour factories. Apply liberally to attain eternal youth./nTomorrow you will meet a tall dark handsome stranger. They will turn out to be a serial killer. Do not approach under any circumstances./nHave a good day! Your custom is important to us, please call again."
+let message="Listen to yourself about your body. Don’t be “influenced” by people who don’t know your body, don’t know your medical history, don’t know who you are and what you need. Do listen to doctors, obviously. They know what riboflavin is!"
 let messages=message.split("/n")
 console.log(messages)
 messages.forEach(function(m,i){

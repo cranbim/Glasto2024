@@ -26,13 +26,13 @@
 // Adafruit_NeoPixel strip0(LED_STEM_COUNT,6, NEO_GRBW + NEO_KHZ800);
 Adafruit_NeoPixel strip0(LED_STEM_COUNT,6, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip1(LED_STEM_COUNT,5, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel strip2(LED_STEM_COUNT,4, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel strip3(LED_STEM_COUNT,7, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip2(LED_STEM_COUNT,7, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip3(LED_STEM_COUNT,4, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip4(LED_STEM_COUNT,8, NEO_GRB + NEO_KHZ800);
 
 int currentChase=0;
 int numChase=50;
-int numLit=10;
+int numLit=20;
 
 
 
@@ -41,6 +41,19 @@ int numRows=4;
 int ledsPerRow=floor(144/6.5);
 
 
+void clearAll(){
+  strip0.clear();   
+  strip0.show();
+  strip1.clear();   
+  strip1.show();
+  strip2.clear();   
+  strip2.show();
+  strip3.clear();   
+  strip3.show();
+  strip4.clear();   
+  strip4.show();
+  // delay(100);
+}
 
 void chase0(){
   strip0.clear();   
@@ -150,9 +163,13 @@ void heartSparkle(int strip){
 
 // bool toggleIn=false;
 int count=0;
-int loopLength=500;
+int loopLength=800;
 int triggerStart0=0;
-int triggerEnd0=50
+int triggerEnd0=150;
+int triggerStart1=100;
+int triggerEnd1=250;
+int triggerStart2=200;
+int triggerEnd2=350;
 
 void setup()
 {
@@ -176,17 +193,20 @@ void setup()
 }
 
 
-//
+//chase1 is strip inside the shop. disable after testing
 void loop(){
   // greenBreath0();
   // greenBreath1();
   // heartSparkle(0);
   // chase0();
   if(count>triggerStart0 && count<triggerEnd0){
-    chase1();
     chase2();
+  } else if(count>triggerStart1 && count<triggerEnd1){
     chase3();
+  } else if(count>triggerStart2 && count<triggerEnd2){
     chase4();
+  } else {
+    clearAll();
   }
   
   currentChase=(currentChase+1)%numChase;
@@ -195,5 +215,5 @@ void loop(){
   if(count>loopLength){
     count=0;
   }
-  delay(5);  
+  delay(6);  
 }
