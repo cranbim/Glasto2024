@@ -13,7 +13,8 @@ let shapes
 let dispScale=1
 let faceBuffer
 let faceBufferLen=180
-let faceBufferCurrentOffset=0
+let faceBufferCurrentOffsetEyes=0
+let faceBufferCurrentOffsetMouth=0
 
 
 function preload(){
@@ -90,17 +91,22 @@ function draw(){
             translate(0,-(capture.height*dispScale-height)/2)
             scale(dispScale)
             image(capture,0,0)
+            // filter(GRAY)
             // getMarks()
             // console.log(">>>")
             // console.log(resizedDetections.length)
             resizedDetections.forEach((rd,i)=>{
                 // drawDetection(rd)
                 faceBuffer.addSnap(capture,rd)
+                faceBuffer.addEyeSnap(capture,rd)
+                faceBuffer.addMouthSnap(capture,rd)
                 // labelEmotion(rd,i)
             })
             let gotOldFace=faceBuffer.getRandomSnap()
             if(gotOldFace && resizedDetections.length>0){
-                showFace(gotOldFace,resizedDetections[0])
+                // showFace(gotOldFace,resizedDetections[0])
+                showEyes(gotOldFace.eyes,resizedDetections[0])
+                showMouth(gotOldFace.mouth,resizedDetections[0])
                 // image(gotOldFace.img,0,0)
             }
             shapes.run()
@@ -118,6 +124,84 @@ function showFace(oldFace,currentFacePlace){
     let h=floor(currentFacePlace.alignedRect._box._height)
     let w=floor(currentFacePlace.alignedRect._box._width)
     image(oldFace.img,x,y,w,h)
+}
+
+function showEyes(oldEyes,currentFacePlace){
+    //cal current eyes centre and angle
+    let cheekbl={
+        x:floor(currentFacePlace.landmarks._positions[1]._x),
+        y:floor(currentFacePlace.landmarks._positions[1]._y),
+    }
+    let cheekbr={
+        x:floor(currentFacePlace.landmarks._positions[15]._x),
+        y:floor(currentFacePlace.landmarks._positions[15]._y)
+    }
+    let eyebrowml={
+        x:floor(currentFacePlace.landmarks._positions[19]._x),
+        y:floor(currentFacePlace.landmarks._positions[19]._y)
+    }
+    let eyebrowmr={
+        x:floor(currentFacePlace.landmarks._positions[24]._x),
+        y:floor(currentFacePlace.landmarks._positions[24]._y)
+    }
+    let browmid={
+        x:(eyebrowml.x+eyebrowmr.x)/2,
+        y:(eyebrowml.y+eyebrowmr.y)/2
+    }
+    let cheekmid={
+        x:(cheekbl.x+cheekbr.x)/2,
+        y:(cheekbl.y+cheekbr.y)/2
+    }
+    let boxh=dist(browmid.x, browmid.y, cheekmid.x, cheekmid.y)
+    let boxw=dist(cheekbl.x, cheekbl.y, cheekbr.x, cheekbr.y)
+    let cp={
+        x: (browmid.x+cheekmid.x)/2,
+        y: (browmid.y+cheekmid.y)/2,
+    }
+    let cAngle=atan2(cheekbr.y-cheekbl.y, cheekbr.x-cheekbl.x)
+    //render old eyes
+    push()
+    // translate(cp.x,cp.y)
+    translate(cheekbl.x,cheekbl.y)
+    rotate(cAngle)
+    imageMode(CORNER)
+    image(oldEyes.img,0,-boxh,boxw,boxh)
+    pop()
+}
+
+function showMouth(oldMouth,currentFacePlace){
+    //cal current mouth centre and angle
+    let cheektl={
+        x:floor(currentFacePlace.landmarks._positions[2]._x),
+        y:floor(currentFacePlace.landmarks._positions[2]._y),
+    }
+    let cheektr={
+        x:floor(currentFacePlace.landmarks._positions[14]._x),
+        y:floor(currentFacePlace.landmarks._positions[14]._y)
+    }
+    let chinb={
+        x:floor(currentFacePlace.landmarks._positions[8]._x),
+        y:floor(currentFacePlace.landmarks._positions[8]._y)
+    }
+    let topmid={
+        x:(cheektl.x+cheektr.x)/2,
+        y:(cheektl.y+cheektr.y)/2
+    }
+    let boxh=dist(topmid.x, topmid.y, chinb.x, chinb.y)
+    let boxw=dist(cheektl.x, cheektl.y, cheektr.x, cheektr.y)
+    let cp={
+        x: (topmid.x+chinb.x)/2,
+        y: (topmid.y+chinb.y)/2,
+    }
+    let cAngle=atan2(cheektr.y-cheektl.y, cheektr.x-cheektl.x)
+    //render old mouth
+    push()
+    // translate(cp.x,cp.y)
+    translate(cheektl.x,cheektl.y)
+    rotate(cAngle)
+    imageMode(CORNER)
+    image(oldMouth.img,0,0,boxw,boxh)
+    pop()
 }
 
 function labelEmotion(det,index){
@@ -172,6 +256,9 @@ function labelEmotion(det,index){
 function FaceBuffer(n){
     let hist=[]
     let histMaxLen=n
+    let histEyes=[]
+    let histMouth=[]
+    let effect=0
 
     this.addSnap=function(source,det){
         let x=floor(det.alignedRect._box._x)
@@ -186,13 +273,140 @@ function FaceBuffer(n){
         }
     }
 
+    this.addEyeSnap=function(source,det){
+        
+        if(random(100)<3){
+            effect=floor(random(3))
+        }
+        let cheekbl={
+            x:floor(det.landmarks._positions[1]._x),
+            y:floor(det.landmarks._positions[1]._y),
+        }
+        let cheekbr={
+            x:floor(det.landmarks._positions[15]._x),
+            y:floor(det.landmarks._positions[15]._y)
+        }
+        let eyebrowml={
+            x:floor(det.landmarks._positions[19]._x),
+            y:floor(det.landmarks._positions[19]._y)
+        }
+        let eyebrowmr={
+            x:floor(det.landmarks._positions[24]._x),
+            y:floor(det.landmarks._positions[24]._y)
+        }
+        let browmid={
+            x:(eyebrowml.x+eyebrowmr.x)/2,
+            y:(eyebrowml.y+eyebrowmr.y)/2
+        }
+        let cheekmid={
+            x:(cheekbl.x+cheekbr.x)/2,
+            y:(cheekbl.y+cheekbr.y)/2
+        }
+        let boxh=dist(browmid.x, browmid.y, cheekmid.x, cheekmid.y)
+        let boxw=dist(cheekbl.x, cheekbl.y, cheekbr.x, cheekbr.y)
+        let cp={
+            x: (browmid.x+cheekmid.x)/2,
+            y: (browmid.y+cheekmid.y)/2,
+        }
+        let cAngle=atan2(cheekbr.y-cheekbl.y, cheekbr.x-cheekbl.x)
+        // stroke(255,0,0)
+        // strokeWeight(2)
+        // noFill(0)
+        // push()
+        // translate(cp.x, cp.y)
+        // rotate(cAngle)
+        // rectMode(CENTER)
+        // rect(0,0,boxw, boxh)
+        // pop()
+        let img=createGraphics(boxw,boxh)
+        img.translate(boxw/2,boxh/2)
+        img.rotate(-cAngle)
+        
+        img.image(source,-cp.x, -cp.y)
+        if(effect==0){
+            img.filter(GRAY)
+        } else if(effect==1){
+            img.filter(POSTERIZE,4)
+        } else if(effect==2){
+            img.filter(INVERT)
+        }
+        // image(img.get(),50,50)
+        // img=createImage(w,h)
+        // img.copy(source, x, y, w, h, 0, 0, w, h)
+        histEyes.push({img:img.get(),w:boxw,h:boxh,a:cAngle})
+        if(histEyes.length>histMaxLen){
+            histEyes.shift()
+        }
+    }
+
+    this.addMouthSnap=function(source,det){
+        let cheektl={
+            x:floor(det.landmarks._positions[2]._x),
+            y:floor(det.landmarks._positions[2]._y),
+        }
+        let cheektr={
+            x:floor(det.landmarks._positions[14]._x),
+            y:floor(det.landmarks._positions[14]._y)
+        }
+        let chinb={
+            x:floor(det.landmarks._positions[8]._x),
+            y:floor(det.landmarks._positions[8]._y)
+        }
+        let topmid={
+            x:(cheektl.x+cheektr.x)/2,
+            y:(cheektl.y+cheektr.y)/2
+        }
+        let boxh=dist(topmid.x, topmid.y, chinb.x, chinb.y)
+        let boxw=dist(cheektl.x, cheektl.y, cheektr.x, cheektr.y)
+        let cp={
+            x: (topmid.x+chinb.x)/2,
+            y: (topmid.y+chinb.y)/2,
+        }
+        let cAngle=atan2(cheektr.y-cheektl.y, cheektr.x-cheektl.x)
+        // stroke(255,0,0)
+        // strokeWeight(2)
+        // noFill(0)
+        // push()
+        // translate(cp.x, cp.y)
+        // rotate(cAngle)
+        // rectMode(CENTER)
+        // rect(0,0,boxw, boxh)
+        // pop()
+        let img=createGraphics(boxw,boxh)
+        img.translate(boxw/2,boxh/2)
+        img.rotate(-cAngle)
+        img.image(source,-cp.x, -cp.y)
+        if(effect==0){
+            img.filter(INVERT)
+        } else if(effect==1){
+            img.filter(GRAY)
+        } else if(effect==2){
+            img.filter(POSTERIZE,4)
+        }
+        // img.filter(POSTERIZE,4)
+        // image(img.get(),50,150)
+        // img=createImage(w,h)
+        // img.copy(source, x, y, w, h, 0, 0, w, h)
+        histMouth.push({img:img.get(),w:boxw,h:boxh,a:cAngle})
+        if(histMouth.length>histMaxLen){
+            histMouth.shift()
+        }
+    }
+
     this.getRandomSnap=function(){
         if(random(100)<5){
-            faceBufferCurrentOffset=floor(random(faceBufferLen))
+            faceBufferCurrentOffsetEyes=constrain(floor(random(faceBufferLen)),0,histEyes.length-1)
         }
-        let index=floor(hist.length-1-faceBufferCurrentOffset)
-        if(hist.length>0){
-            return hist[index]
+        if(random(100)<5){
+            faceBufferCurrentOffsetMouth=constrain(floor(random(faceBufferLen)),0,histMouth.length-1)
+        }
+        let indexEyes=floor(histEyes.length-1-faceBufferCurrentOffsetEyes)
+        let indexMouth=floor(histEyes.length-1-faceBufferCurrentOffsetMouth)
+        if(histEyes.length>0){
+            return {
+                eyes:histEyes[indexEyes],
+                mouth:histMouth[indexMouth]
+            }
         } else {
             return null
         }
